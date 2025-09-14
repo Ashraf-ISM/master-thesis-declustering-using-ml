@@ -25,7 +25,7 @@ This repository presents a novel machine learning approach to earthquake catalog
 
 ## Research Highlights
 
-- **93% improvement** in aftershock detection accuracy over traditional windowing methods
+- **x % improvement** in aftershock detection accuracy over traditional windowing methods
 - **Novel SOM-DBSCAN** hybrid architecture for multidimensional seismic clustering
 - **Comprehensive validation** using coefficient of variation and m-Morisita spatial indices
 - **Open-source implementation** with reproducible workflows and benchmarking tools
@@ -220,7 +220,7 @@ IIT (ISM) Dhanbad
 
 **Research Interests:** Seismology • GPS Geodesy • Machine Learning in Geophysics • Seismic Hazard Assessment
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-ashraf--portfolio-blue?style=flat&logo=google-chrome)](https://ashraf-portfolio)  
+[![Portfolio](https://img.shields.io/badge/Portfolio-ashraf--portfolio-blue?style=flat&logo=google-chrome)](https://ash-geophysics.netlify.app/)  
 [![GitHub](https://img.shields.io/badge/GitHub-Ashraf--ISM-black?style=flat&logo=github)](https://github.com/Ashraf-ISM)  
 [![Email](https://img.shields.io/badge/Email-23mc0049@iitism.ac.in-red?style=flat&logo=gmail)](mailto:23mc0049@iitism.ac.in)
 
