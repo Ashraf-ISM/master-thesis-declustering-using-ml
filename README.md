@@ -1,272 +1,483 @@
-# 🌍 Machine Learning–Based Declustering of Earthquake Catalogs
-
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![XGBoost](https://img.shields.io/badge/XGBoost-EA4335?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Active_Research-yellow?style=for-the-badge)
+# 🌍 Earthquake Declustering with Machine Learning
 
-**Adaptive, threshold-free framework for separating mainshocks from aftershocks using physics-informed machine learning**
+### *Separating Mainshocks from Aftershocks Using Physics-Informed AI*
 
-[📖 Documentation](#documentation) • [🚀 Quick Start](#quick-start) • [📊 Results](#results) • [🤝 Contributing](#contributing)
+[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-EA4335?style=for-the-badge&logo=xgboost&logoColor=white)](https://xgboost.ai/)
+[![Scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![Status](https://img.shields.io/badge/Status-Active_Research-success?style=for-the-badge)](https://github.com)
+
+<img src="https://img.shields.io/badge/Accuracy-97.44%25-brightgreen?style=for-the-badge" />
+<img src="https://img.shields.io/badge/F1_Score-98.20%25-blue?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Recall-98.74%25-orange?style=for-the-badge" />
+
+---
+
+**[🎯 Overview](#-the-big-picture) • [🔬 Methodology](#-methodology) • [📊 Results](#-results) • [🚀 Quick Start](#-quick-start) • [🤝 Contribute](#-contributing)**
 
 </div>
 
 ---
 
-## 🎯 Overview
+## 🎯 The Big Picture
 
-Earthquake catalogs contain both **independent background events** (mainshocks) and **dependent triggered events** (foreshocks/aftershocks). Accurately separating these populations—known as **declustering**—is fundamental for:
+<table>
+<tr>
+<td width="50%">
 
-- 🗺️ Seismic hazard assessment and building codes
-- 📈 Statistical seismology and b-value estimation
-- ⚡ Earthquake forecasting and early warning systems
-- 🏗️ Infrastructure planning and risk mitigation
+### The Challenge
 
-### ⚠️ The Problem with Traditional Methods
+Earthquake catalogs are messy. They contain:
+- 🟢 **Independent mainshocks** (background seismicity)
+- 🔴 **Dependent aftershocks** (triggered events)
 
-Classical declustering techniques (Reasenberg, Gardner-Knopoff, NND) rely on **fixed empirical thresholds**:
+**Why it matters:**
+- Mixing them up → Bad hazard maps
+- Aftershocks skew statistical analyses
+- Building codes need clean data
 
+</td>
+<td width="50%">
+
+### Our Solution
+
+**Adaptive ML framework** that learns from physics:
+
+```diff
+- Fixed time-distance windows
+- Manual parameter tuning
+- Regional recalibration needed
+
++ Threshold-free classification
++ Physics-informed features
++ Transfer across regions
 ```
-❌ Fixed time-distance windows
-❌ Regional parameter tuning required
-❌ Poor performance in complex tectonic zones
-❌ Misclassification of overlapping sequences
-```
 
-### 💡 Our Solution
+</td>
+</tr>
+</table>
 
-**Adaptive ML framework** trained on physics-based synthetic catalogs:
+<div align="center">
 
-```
-✅ Threshold-free classification
-✅ Data-driven feature learning
-✅ Regionally transferable
-✅ Physically interpretable results
-```
+### 💡 **Key Innovation: From Rules to Learning**
+
+Traditional methods use **fixed empirical thresholds** → We use **adaptive ML trained on synthetic physics-based catalogs**
+
+</div>
 
 ---
 
 ## 🔬 Methodology
 
-### 1️⃣ **ETAS Synthetic Catalog Generation**
+<div align="center">
 
-We use the **Epidemic-Type Aftershock Sequence (ETAS)** model to generate labeled training data:
-
-```math
-λ(t, x, y | ℋₜ) = μu(x,y) + Σᵢ:ₜᵢ<ₜ ξ(t - tᵢ, x - xᵢ, y - yᵢ; mᵢ)
+```mermaid
+graph LR
+    A[🎲 ETAS Simulation] --> B[📐 NND Features]
+    B --> C[🤖 XGBoost Training]
+    C --> D[🗺️ Real Catalog Classification]
+    D --> E[✨ Declustered Output]
+    
+    style A fill:#ff6b6b
+    style B fill:#4ecdc4
+    style C fill:#95e1d3
+    style D fill:#f38181
+    style E fill:#aa96da
 ```
 
-**Key ETAS Parameters (New Zealand):**
+</div>
 
-| Parameter | Symbol | Value | Physical Meaning |
-|-----------|--------|-------|------------------|
-| Background Rate | μ | 0.4766 | Spontaneous earthquake rate |
-| Productivity | K | 4.9184 | Aftershock generation capacity |
-| Mag Productivity | α | 1.2334 | Magnitude-productivity scaling |
-| Temporal Decay | p | 1.0051 | Aftershock decay rate |
-| Spatial Scale | D | 0.0022 | Typical aftershock distance |
-| Spatial Decay | q | 1.6122 | Distance decay exponent |
-| Mag-Spatial Scale | γ | 0.4476 | Magnitude-rupture scaling |
+### 🎲 **Stage 1: ETAS Synthetic Catalog Generation**
 
-**Output:** Synthetic catalog with ground-truth labels
-- `Label 0`: Background events (mainshocks)
-- `Label 1`: Triggered events (aftershocks)
+<details>
+<summary><b>📖 What is ETAS?</b></summary>
 
----
+<br>
 
-### 2️⃣ **Nearest-Neighbor Distance (NND) Analysis**
-
-NND measures space-time-energy proximity between earthquakes:
+The **Epidemic-Type Aftershock Sequence** model treats earthquakes as a branching process:
 
 ```python
-# Core NND Formula
-η_ij = T_ij × R_ij
+λ(t, x, y) = μ · background_rate + Σ triggered_by_previous_events
+```
+
+**7 Physical Parameters Control Everything:**
+
+| Parameter | Symbol | NZ Value | Controls |
+|-----------|--------|----------|----------|
+| 🌊 Background Rate | μ | 0.477 | Spontaneous events/day |
+| ⚡ Productivity | K | 4.918 | Aftershocks per mainshock |
+| 📏 Mag Scaling | α | 1.233 | Bigger = more aftershocks |
+| ⏱️ Temporal Decay | p | 1.005 | How fast activity drops |
+| 📍 Spatial Scale | D | 0.002 | Typical aftershock distance |
+| 🎯 Spatial Decay | q | 1.612 | Distance falloff rate |
+| 🔗 Mag-Space Link | γ | 0.448 | Rupture size scaling |
+
+**Output:** Synthetic catalog with ground-truth labels for training
+
+</details>
+
+---
+
+### 📐 **Stage 2: Nearest-Neighbor Distance (NND) Features**
+
+<div align="center">
+
+#### 🧮 **The Magic Formula**
+
+```
+η = T × R
 
 where:
-    T_ij = t_ij × 10^(-b·mᵢ/2)     # Rescaled Time
-    R_ij = r_ij^df × 10^(-b·mᵢ/2)  # Rescaled Distance
-    
-    t_ij: inter-event time
-    r_ij: spatial distance
-    mᵢ: magnitude of event i
-    df: fractal dimension (~1.57 for NZ)
-    b: Gutenberg-Richter b-value (~1.0)
+  T = t_ij × 10^(-b·m/2)      [Rescaled Time]
+  R = r_ij^df × 10^(-b·m/2)   [Rescaled Distance]
 ```
 
-**Why NND Works:**
-
-<div align="center">
-
-| η Value | Interpretation |
-|---------|---------------|
-| η → 0 | **Close clustering** → Likely aftershock |
-| η → ∞ | **Distant events** → Likely independent |
+<table>
+<tr>
+<th>Close η → Aftershock</th>
+<th>Distant η → Independent</th>
+</tr>
+<tr>
+<td align="center">🔴 Space-time clustering</td>
+<td align="center">🟢 Isolated events</td>
+</tr>
+</table>
 
 </div>
 
-The bimodal distribution of η naturally separates the two populations!
+**Five Features Extracted:**
+
+<table>
+<tr>
+<td align="center">
+
+**⏱️ Rescaled Time (T)**
+<br>
+<sub>Temporal trigger likelihood</sub>
+
+</td>
+<td align="center">
+
+**📍 Rescaled Distance (R)**
+<br>
+<sub>Spatial coupling strength</sub>
+
+</td>
+<td align="center">
+
+**📊 Magnitude Δ (Δm)**
+<br>
+<sub>Energy hierarchy</sub>
+
+</td>
+</tr>
+<tr>
+<td align="center">
+
+**🎯 NND Metric (η)**
+<br>
+<sub>Composite space-time</sub>
+
+</td>
+<td align="center">
+
+**🔗 Parent Index**
+<br>
+<sub>Event linkage</sub>
+
+</td>
+<td align="center">
+
+**💎 Most Powerful**
+<br>
+<sub>η = 35.2% importance</sub>
+
+</td>
+</tr>
+</table>
 
 ---
 
-### 3️⃣ **Feature Engineering**
-
-Five physics-informed features extracted for each earthquake pair:
-
-| Feature | Formula | Physical Interpretation |
-|---------|---------|------------------------|
-| **Rescaled Time** | `T = t × 10^(-b·m/2)` | Temporal triggering likelihood |
-| **Rescaled Distance** | `R = r^df × 10^(-b·m/2)` | Spatial coupling strength |
-| **Magnitude Difference** | `Δm = mⱼ - mᵢ` | Energy hierarchy (independence indicator) |
-| **NND Metric** | `η = T × R` | Composite space-time distance |
-| **Parent Index** | `i` | Most probable parent event |
-
-**Feature Importance (XGBoost):**
-
-```
-███████████████████████████████████ η (NND Metric)        35.2%
-█████████████████████████████ R (Rescaled Distance) 28.7%
-███████████████████ T (Rescaled Time)        19.4%
-████████████ Δm (Magnitude Diff)      11.8%
-█████ Parent Index                4.9%
-```
-
----
-
-### 4️⃣ **Model Training & Selection**
-
-Four supervised ML models tested on ETAS synthetic catalogs:
+### 🤖 **Stage 3: XGBoost Classification**
 
 <div align="center">
 
-| Model | Accuracy | Precision | Recall | F1-Score |
-|-------|----------|-----------|--------|----------|
-| 🏆 **XGBoost** | **97.44%** | **97.66%** | **98.74%** | **98.20%** |
-| Gradient Boosting | 97.11% | 97.06% | 98.89% | 97.97% |
-| Random Forest | 96.72% | 96.22% | 95.15% | 97.91% |
-| SVM | 94.36% | 94.48% | 94.36% | 94.40% |
+<table>
+<tr>
+<th>🏆 Model</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1-Score</th>
+</tr>
+<tr style="background-color: #d4edda;">
+<td><b>XGBoost</b> 🥇</td>
+<td><b>97.44%</b></td>
+<td><b>97.66%</b></td>
+<td><b>98.74%</b></td>
+<td><b>98.20%</b></td>
+</tr>
+<tr>
+<td>Gradient Boosting 🥈</td>
+<td>97.11%</td>
+<td>97.06%</td>
+<td>98.89%</td>
+<td>97.97%</td>
+</tr>
+<tr>
+<td>Random Forest 🥉</td>
+<td>96.72%</td>
+<td>96.22%</td>
+<td>95.15%</td>
+<td>97.91%</td>
+</tr>
+<tr>
+<td>SVM</td>
+<td>94.36%</td>
+<td>94.48%</td>
+<td>94.36%</td>
+<td>94.40%</td>
+</tr>
+</table>
+
+#### 🎯 **Confusion Matrix Highlights**
+
+<table>
+<tr>
+<td></td>
+<th>Predicted Background</th>
+<th>Predicted Triggered</th>
+</tr>
+<tr>
+<th>Actual Background</th>
+<td align="center" style="background-color: #d4edda;"><b>94.4%</b> ✅</td>
+<td align="center" style="background-color: #f8d7da;">5.6%</td>
+</tr>
+<tr>
+<th>Actual Triggered</th>
+<td align="center" style="background-color: #f8d7da;">1.3%</td>
+<td align="center" style="background-color: #d4edda;"><b>98.7%</b> ✅</td>
+</tr>
+</table>
+
+**🎊 98.7% of aftershocks correctly detected!**
 
 </div>
-
-**Confusion Matrix (XGBoost):**
-
-```
-                 Predicted
-              Background  Triggered
-Actual  
-Background     94.4%       5.6%      ✅ High specificity
-Triggered      1.3%       98.7%      ✅ Excellent sensitivity
-```
-
-**Winner: XGBoost** 
-- Best balance of precision/recall
-- Robust to class imbalance
-- Fast inference on large catalogs
 
 ---
 
-## 🗺️ Case Study: New Zealand Seismicity
-
-### Dataset Overview
+## 🗺️ Case Study: New Zealand
 
 <div align="center">
 
-| **Property** | **Value** |
-|--------------|-----------|
-| 📅 Time Period | 1980 – 2024 (44 years) |
-| 📍 Region | Pacific-Australian Plate Boundary |
-| 🌐 Total Events | 396,267 earthquakes |
-| 📏 Magnitude Range | Mw ≥ 2.2 (completeness threshold) |
-| 🧮 Fractal Dimension | df ≈ 1.568 |
-| 🎯 Tectonic Features | Alpine Fault, Hikurangi Subduction Zone |
+### 📍 **Pacific-Australian Plate Boundary**
+
+<table>
+<tr>
+<td align="center">
+
+**📅 Duration**
+<br>
+44 years
+<br>
+<sub>(1980–2024)</sub>
+
+</td>
+<td align="center">
+
+**🌐 Events**
+<br>
+396,267
+<br>
+<sub>earthquakes</sub>
+
+</td>
+<td align="center">
+
+**📏 Magnitude**
+<br>
+Mw ≥ 2.2
+<br>
+<sub>completeness</sub>
+
+</td>
+<td align="center">
+
+**🧮 Fractal Dim**
+<br>
+df ≈ 1.568
+<br>
+<sub>spatial dist</sub>
+
+</td>
+</tr>
+</table>
 
 </div>
 
-### Tectonic Context
+### 🏔️ **Tectonic Setting**
+
+<table>
+<tr>
+<td width="50%">
+
+#### Alpine Fault (South Island)
 
 ```
-🏔️ Alpine Fault (South Island)
-   └─ Strike-slip boundary
-   └─ ~30mm/yr plate motion
-   └─ M7+ earthquake recurrence ~300 years
-
-🌊 Hikurangi Subduction Zone (North Island)  
-   └─ Pacific plate subducting beneath Australian plate
-   └─ Slow slip events and megathrust potential
-   └─ Dense seismicity and tsunami hazard
+🎯 Type: Strike-slip boundary
+⚡ Motion: ~30 mm/year
+📈 Major quakes: M7+ every ~300 years
+🗺️ Length: 600 km
 ```
+
+</td>
+<td width="50%">
+
+#### Hikurangi Subduction Zone (North)
+
+```
+🎯 Type: Pacific subducting beneath Australian
+⚡ Motion: Megathrust potential
+📈 Activity: Dense seismicity + slow slip
+🌊 Hazard: Tsunami-capable
+```
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## 📊 Results
 
-### Classification Performance
-
-**XGBoost Declustering Results:**
-
 <div align="center">
 
-| Event Type | Count | Percentage |
-|------------|-------|------------|
-| 🟢 **Background** (Mainshocks) | 230,758 | **58.23%** |
-| 🔴 **Triggered** (Aftershocks) | 165,509 | **41.75%** |
+### 🎉 **Declustering Success**
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+### 🟢 Background
+**230,758 events**
+<br>
+<h1>58.23%</h1>
+<sub>Independent mainshocks</sub>
+
+</td>
+<td align="center" width="33%">
+
+### 🔴 Triggered
+**165,509 events**
+<br>
+<h1>41.75%</h1>
+<sub>Aftershock sequences</sub>
+
+</td>
+<td align="center" width="33%">
+
+### 🎯 Accuracy
+**XGBoost Model**
+<br>
+<h1>97.44%</h1>
+<sub>Classification performance</sub>
+
+</td>
+</tr>
+</table>
+
+---
+
+### 📍 **Spatial Patterns Revealed**
 
 </div>
 
-### Spatial Distribution
+<table>
+<tr>
+<td width="50%">
 
-**Key Observations:**
+#### 🟢 **Background Events**
 
-1. **Background Events (Independent):**
-   - 🏔️ Concentrated along Alpine Fault (South Island)
-   - 🌊 Distributed across Hikurangi Subduction Zone (North Island)
-   - ✅ Consistent with tectonic plate boundaries
+✅ Concentrated along **Alpine Fault**
+<br>
+✅ Distributed across **Hikurangi Subduction**
+<br>
+✅ Follow tectonic plate boundaries
+<br>
+✅ Uniform temporal distribution
 
-2. **Triggered Events (Aftershocks):**
-   - 💥 Dense clusters near **Canterbury region** (2010-2011 sequence)
-   - ⚡ Major clustering around **Kaikōura Mw 7.8** (2016)
-   - 📍 Concentrated aftershock zones validate physical model
+**Interpretation:** These are the "normal" earthquakes driven by tectonic stress accumulation
 
-### Temporal Evolution
+</td>
+<td width="50%">
 
-```
-Major Earthquake Sequences Identified:
+#### 🔴 **Triggered Events**
 
-2010-2011 Canterbury Sequence
-├─ Darfield Mw 7.1 (Sep 2010)
-├─ Christchurch Mw 6.3 (Feb 2011)
-└─ ~10,000 aftershocks detected
+💥 Dense clusters near **Canterbury** (2010-2011)
+<br>
+⚡ Major concentration at **Kaikōura** (2016)
+<br>
+🎯 Clear aftershock zones identified
+<br>
+⏱️ Temporal decay patterns observed
 
-2013 Cook Strait/Seddon
-├─ Lake Grassmere Mw 6.5 (Jul 2013)
-└─ ~2,500 aftershocks
+**Interpretation:** These are stress-transfer driven events following major mainshocks
 
-2016 Kaikōura Earthquake
-├─ Mainshock Mw 7.8 (Nov 2016)
-└─ ~15,000+ aftershocks (ongoing)
-```
+</td>
+</tr>
+</table>
+
+<div align="center">
+
+---
+
+### ⚡ **Major Earthquake Sequences Detected**
+
+<table>
+<tr>
+<th>Event</th>
+<th>Year</th>
+<th>Magnitude</th>
+<th>Aftershocks Detected</th>
+</tr>
+<tr>
+<td>🌋 Canterbury (Darfield)</td>
+<td>2010</td>
+<td>Mw 7.1</td>
+<td>~10,000+</td>
+</tr>
+<tr>
+<td>💔 Christchurch</td>
+<td>2011</td>
+<td>Mw 6.3</td>
+<td>(Part of Canterbury sequence)</td>
+</tr>
+<tr>
+<td>🌊 Cook Strait/Seddon</td>
+<td>2013</td>
+<td>Mw 6.5</td>
+<td>~2,500</td>
+</tr>
+<tr>
+<td>⚡ Kaikōura</td>
+<td>2016</td>
+<td>Mw 7.8</td>
+<td>~15,000+ (ongoing)</td>
+</tr>
+</table>
+
+</div>
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### ⚙️ **Installation**
 
 ```bash
-Python 3.8+
-pandas >= 1.3.0
-numpy >= 1.21.0
-scikit-learn >= 1.0.0
-xgboost >= 1.5.0
-matplotlib >= 3.4.0
-seaborn >= 0.11.0
-```
-
-### Installation
-
-```bash
-# Clone repository
+# Clone the repository
 git clone https://github.com/yourusername/earthquake-declustering.git
 cd earthquake-declustering
 
@@ -274,388 +485,320 @@ cd earthquake-declustering
 pip install -r requirements.txt
 ```
 
-### Usage
+### 💻 **Basic Usage**
 
-#### 1. Generate ETAS Synthetic Catalog
+<details>
+<summary><b>🎲 Generate ETAS Synthetic Catalog</b></summary>
 
 ```python
 from etas_model import ETASSimulator
 
 # Initialize with New Zealand parameters
 simulator = ETASSimulator(
-    mu=0.4766, k=4.9184, alpha=1.2334,
-    p=1.0051, d=0.0022, q=1.6122, gamma=0.4476
+    mu=0.4766,      # Background rate
+    k=4.9184,       # Productivity
+    alpha=1.2334,   # Magnitude scaling
+    p=1.0051,       # Temporal decay
+    d=0.0022,       # Spatial scale
+    q=1.6122,       # Spatial decay
+    gamma=0.4476    # Mag-spatial link
 )
 
-# Generate synthetic catalog
+# Generate 10 years of synthetic seismicity
 synthetic_catalog = simulator.simulate(
-    duration=365*10,  # 10 years
+    duration=365*10,
     magnitude_threshold=2.2
 )
 ```
 
-#### 2. Extract NND Features
+</details>
+
+<details>
+<summary><b>📐 Extract NND Features</b></summary>
 
 ```python
 from nnd_analysis import NNDFeatureExtractor
 
-# Initialize feature extractor
-extractor = NNDFeatureExtractor(b_value=1.0, fractal_dim=1.568)
+# Initialize with catalog parameters
+extractor = NNDFeatureExtractor(
+    b_value=1.0,        # Gutenberg-Richter
+    fractal_dim=1.568   # Spatial dimension
+)
 
-# Compute features
+# Extract features
 features = extractor.extract_features(synthetic_catalog)
-# Returns: [T, R, Δm, η, parent_index]
+# Returns: DataFrame with [T, R, Δm, η, parent_index]
 ```
 
-#### 3. Train XGBoost Model
+</details>
+
+<details>
+<summary><b>🤖 Train XGBoost Classifier</b></summary>
 
 ```python
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 
-# Prepare training data
+# Prepare data
 X = features[['T', 'R', 'dm', 'eta', 'parent_idx']]
 y = synthetic_catalog['label']  # 0: background, 1: triggered
 
+# Split
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# Train model
+# Train
 model = XGBClassifier(
     max_depth=6,
     learning_rate=0.1,
-    n_estimators=200,
-    objective='binary:logistic'
+    n_estimators=200
 )
 model.fit(X_train, y_train)
 
 # Evaluate
-accuracy = model.score(X_test, y_test)
-print(f"Accuracy: {accuracy:.4f}")
+print(f"Accuracy: {model.score(X_test, y_test):.4f}")
 ```
 
-#### 4. Apply to Real Catalog
+</details>
+
+<details>
+<summary><b>🗺️ Apply to Real Catalog</b></summary>
 
 ```python
-# Load New Zealand catalog
-nz_catalog = pd.read_csv('new_zealand_catalog.csv')
+import pandas as pd
+
+# Load your earthquake catalog
+catalog = pd.read_csv('earthquake_catalog.csv')
 
 # Extract features
-real_features = extractor.extract_features(nz_catalog)
+real_features = extractor.extract_features(catalog)
 
-# Predict
+# Classify
 predictions = model.predict(real_features)
-nz_catalog['event_type'] = predictions  # 0: background, 1: triggered
+probabilities = model.predict_proba(real_features)
+
+# Add to catalog
+catalog['event_type'] = predictions  # 0: background, 1: triggered
+catalog['aftershock_probability'] = probabilities[:, 1]
 
 # Export declustered catalog
-background_events = nz_catalog[nz_catalog['event_type'] == 0]
-background_events.to_csv('nz_declustered_background.csv', index=False)
+background = catalog[catalog['event_type'] == 0]
+background.to_csv('declustered_mainshocks.csv', index=False)
 ```
+
+</details>
 
 ---
 
-## 📈 Model Comparison with Traditional Methods
-
-### Quantitative Comparison
+## 🎓 Why This Approach Works
 
 <div align="center">
 
-| Method | Background % | Triggered % | Adaptability | Computation |
-|--------|--------------|-------------|--------------|-------------|
-| **XGBoost (Ours)** | **58.23%** | **41.75%** | ✅ High | Fast |
-| Gradient Boosting | 55.36% | 44.64% | ✅ High | Fast |
-| Random Forest | 68.80% | 31.20% | ✅ Medium | Medium |
-| SVM | 72.69% | 27.01% | ⚠️ Medium | Slow |
-| Gardner-Knopoff | ~65% | ~35% | ❌ Fixed | Fast |
-| Reasenberg | ~60% | ~40% | ❌ Fixed | Fast |
+### 🆚 **Comparison with Traditional Methods**
+
+<table>
+<tr>
+<th>Aspect</th>
+<th>Gardner-Knopoff / Reasenberg</th>
+<th>🚀 ML-Based (Ours)</th>
+</tr>
+<tr>
+<td><b>Threshold</b></td>
+<td>❌ Fixed time-distance windows</td>
+<td>✅ Learned from data</td>
+</tr>
+<tr>
+<td><b>Adaptability</b></td>
+<td>❌ Needs regional tuning</td>
+<td>✅ Transfers across regions</td>
+</tr>
+<tr>
+<td><b>Complex Patterns</b></td>
+<td>⚠️ Misses overlapping sequences</td>
+<td>✅ Captures nuanced interactions</td>
+</tr>
+<tr>
+<td><b>Uncertainty</b></td>
+<td>❌ Binary decision only</td>
+<td>✅ Probability estimates</td>
+</tr>
+<tr>
+<td><b>Physical Basis</b></td>
+<td>✅ Window-based heuristics</td>
+<td>✅ Physics-informed features</td>
+</tr>
+</table>
 
 </div>
-
-### Advantages Over Classical Methods
-
-| Aspect | Traditional | ML-Based (Ours) |
-|--------|-------------|-----------------|
-| **Threshold Selection** | Manual calibration | Learned from data |
-| **Regional Transfer** | Re-tune parameters | Direct application |
-| **Complex Patterns** | Misses overlapping | Captures nuances |
-| **Physical Interpretation** | Window-based | Feature importance |
-| **Uncertainty** | Binary decision | Probability estimates |
-
----
-
-## 🔍 Feature Importance Analysis
-
-**What Makes an Earthquake an Aftershock?**
-
-Our XGBoost model reveals the key discriminating factors:
-
-```python
-Feature Importance Ranking:
-
-1. η (NND Metric) ████████████████████████████████ 35.2%
-   → Composite space-time proximity is the strongest signal
-   
-2. R (Rescaled Distance) ████████████████████████ 28.7%
-   → Spatial clustering heavily influences classification
-   
-3. T (Rescaled Time) ███████████████ 19.4%
-   → Recent events more likely to be triggered
-   
-4. Δm (Magnitude Difference) █████████ 11.8%
-   → Smaller events after larger ones = aftershocks
-   
-5. Parent Index ███ 4.9%
-   → Linking to specific parent event adds context
-```
-
-**Key Insight:** The composite NND metric (η = T × R) is the most powerful single predictor, validating the physical basis of the approach.
 
 ---
 
 ## 🌐 Regional Transferability
 
-### Tested Regions (Ongoing)
+<div align="center">
 
-| Region | Status | Dataset Size | Tectonic Setting |
-|--------|--------|--------------|------------------|
-| 🇳🇿 **New Zealand** | ✅ Complete | 396,267 | Subduction + Strike-slip |
-| 🇺🇸 **Southern California** | 🔄 In Progress | ~500,000 | Strike-slip (San Andreas) |
-| 🇯🇵 **Japan** | ⏳ Planned | ~1,000,000+ | Subduction (Pacific Ring) |
-| 🇮🇹 **Italy** | ⏳ Planned | ~200,000 | Extensional tectonics |
+### 🗺️ **Testing Across Tectonic Regimes**
 
-**Hypothesis:** NND-based features should transfer well across tectonic settings since they encode fundamental earthquake physics.
+<table>
+<tr>
+<th>Region</th>
+<th>Status</th>
+<th>Events</th>
+<th>Tectonic Setting</th>
+</tr>
+<tr style="background-color: #d4edda;">
+<td>🇳🇿 <b>New Zealand</b></td>
+<td>✅ Complete</td>
+<td>396,267</td>
+<td>Subduction + Strike-slip</td>
+</tr>
+<tr style="background-color: #fff3cd;">
+<td>🇺🇸 <b>Southern California</b></td>
+<td>🔄 In Progress</td>
+<td>~500,000</td>
+<td>Strike-slip (San Andreas)</td>
+</tr>
+<tr style="background-color: #f8d7da;">
+<td>🇯🇵 <b>Japan</b></td>
+<td>⏳ Planned</td>
+<td>~1M+</td>
+<td>Subduction (Pacific Ring)</td>
+</tr>
+<tr style="background-color: #f8d7da;">
+<td>🇮🇹 <b>Italy</b></td>
+<td>⏳ Planned</td>
+<td>~200,000</td>
+<td>Extensional tectonics</td>
+</tr>
+</table>
 
----
+**Hypothesis:** NND features encode fundamental earthquake physics → should transfer globally
 
-## 🛠️ Advanced Configuration
-
-### Hyperparameter Tuning
-
-```python
-from sklearn.model_selection import GridSearchCV
-
-param_grid = {
-    'max_depth': [4, 6, 8],
-    'learning_rate': [0.01, 0.1, 0.2],
-    'n_estimators': [100, 200, 300],
-    'subsample': [0.8, 0.9, 1.0],
-    'colsample_bytree': [0.8, 0.9, 1.0]
-}
-
-grid_search = GridSearchCV(
-    XGBClassifier(objective='binary:logistic'),
-    param_grid,
-    cv=5,
-    scoring='f1',
-    n_jobs=-1
-)
-
-grid_search.fit(X_train, y_train)
-best_model = grid_search.best_estimator_
-```
-
-### Custom ETAS Parameters
-
-```python
-# Estimate parameters from your catalog
-from etas_model import ETASParameterEstimator
-
-estimator = ETASParameterEstimator()
-params = estimator.fit(your_catalog)
-
-print(f"Estimated parameters:")
-print(f"μ = {params['mu']:.4f}")
-print(f"K = {params['k']:.4f}")
-print(f"α = {params['alpha']:.4f}")
-# ... etc
-```
-
----
-
-## 📚 Documentation
-
-### Key References
-
-1. **ETAS Model:**
-   - Ogata, Y. (1988). *Statistical models for earthquake occurrences and residual analysis for point processes*. JASA.
-   
-2. **NND Analysis:**
-   - Zaliapin, I., & Ben-Zion, Y. (2013). *Earthquake clusters in southern California*. JGR: Solid Earth.
-
-3. **Machine Learning Application:**
-   - Aden-Antoniów, F., Frank, W. B., & Seydoux, L. (2022). *An adaptable random forest model for the declustering of earthquake catalogs*. JGR: Solid Earth.
-
-4. **This Work:**
-   - Ashraf, M., & Jana, N. (2025). *Machine learning approach to earthquake declustering: Application to New Zealand earthquake catalogue*. [In Preparation]
-
-### Mathematical Foundations
-
-<details>
-<summary><b>Click to expand: ETAS Model Derivation</b></summary>
-
-The conditional intensity function describes the instantaneous earthquake rate:
-
-```math
-λ(t, x, y | ℋₜ) = μ(x, y) + Σᵢ:ₜᵢ<ₜ k₀ e^α(mᵢ - m₀) · g(t - tᵢ) · f(x - xᵢ, y - yᵢ; mᵢ)
-```
-
-Where:
-- **Background term:** μ(x, y) = spatially varying Poisson process
-- **Triggering kernel:** Product of temporal and spatial components
-- **Temporal:** g(t) = (p-1)/c · (1 + t/c)^(-p) (Omori-Utsu law)
-- **Spatial:** f(r; m) = (q-1)/(π d² e^γm) · (1 + r²/(d² e^γm))^(-q)
-
-</details>
-
-<details>
-<summary><b>Click to expand: NND Rescaling Derivation</b></summary>
-
-The rescaling accounts for magnitude-dependent triggering:
-
-```math
-T_ij = t_ij · 10^(-b·mᵢ/2)
-R_ij = r_ij^df · 10^(-b·mᵢ/2)
-```
-
-This normalization ensures:
-- Larger earthquakes (higher m) → larger search windows
-- Self-consistent scaling with rupture dimensions
-- Fractal dimension df accounts for spatial distribution
-
-</details>
+</div>
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+<div align="center">
 
-### Areas for Contribution
+### 🌟 **We Welcome Contributions!**
 
-- 🌍 **Regional Testing:** Apply to new earthquake catalogs
-- 🧮 **Feature Engineering:** Propose new physics-based features
-- 🤖 **Model Development:** Test deep learning architectures
-- 📊 **Visualization:** Improve result presentation
-- 📝 **Documentation:** Enhance tutorials and examples
+<table>
+<tr>
+<td align="center">
 
-### Development Setup
+🌍
+<br>
+**Regional Testing**
+<br>
+<sub>Apply to new catalogs</sub>
+
+</td>
+<td align="center">
+
+🧮
+<br>
+**Feature Engineering**
+<br>
+<sub>Propose new physics features</sub>
+
+</td>
+<td align="center">
+
+🤖
+<br>
+**Model Development**
+<br>
+<sub>Test new architectures</sub>
+
+</td>
+<td align="center">
+
+📊
+<br>
+**Visualization**
+<br>
+<sub>Improve result presentation</sub>
+
+</td>
+</tr>
+</table>
+
+</div>
+
+### 🛠️ **Development Setup**
 
 ```bash
 # Fork and clone
 git clone https://github.com/yourusername/earthquake-declustering.git
 cd earthquake-declustering
 
-# Create virtual environment
+# Create environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dev dependencies
 pip install -r requirements-dev.txt
 
 # Run tests
 pytest tests/
-
-# Code formatting
-black src/
-flake8 src/
-```
-
-### Contribution Guidelines
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/NewFeature`)
-3. Commit changes (`git commit -m 'Add NewFeature'`)
-4. Push to branch (`git push origin feature/NewFeature`)
-5. Open Pull Request
-
----
-
-## 📊 Performance Benchmarks
-
-### Computational Efficiency
-
-<div align="center">
-
-| Operation | Time (396K events) | Memory |
-|-----------|-------------------|--------|
-| NND Feature Extraction | ~45 seconds | ~2.5 GB |
-| XGBoost Training | ~12 seconds | ~1.8 GB |
-| Inference | ~8 seconds | ~1.2 GB |
-| **Total Pipeline** | **~65 seconds** | **~2.5 GB** |
-
-*Tested on: Intel i7-10700K, 32GB RAM*
-
-</div>
-
-### Scalability
-
-```python
-# Performance scales linearly with catalog size
-Catalog Size    Processing Time
------------    ----------------
-10K events     →  2 seconds
-100K events    → 15 seconds
-396K events    → 65 seconds
-1M events      → ~180 seconds (estimated)
 ```
 
 ---
 
-## 🎓 Citation
+## 📚 Key References
 
-If you use this work in your research, please cite:
+<details>
+<summary><b>📖 Foundational Papers</b></summary>
 
-```bibtex
-@mastersthesis{ashraf2025earthquake,
-  title={Machine Learning Approach to Earthquake Declustering: 
-         Application to New Zealand Earthquake Catalogue},
-  author={Ashraf, Md},
-  school={Indian Institute of Technology (ISM) Dhanbad},
-  year={2025},
-  supervisor={Jana, Niptika},
-  department={Applied Geophysics}
-}
-```
+<br>
 
----
+1. **Aden-Antoniów et al. (2022)** - *An adaptable random forest model for the declustering of earthquake catalogs*. JGR: Solid Earth.
 
-## 📜 License
+2. **Zaliapin & Ben-Zion (2013)** - *Earthquake clusters in southern California*. JGR: Solid Earth.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+3. **Ogata (1988)** - *Statistical models for earthquake occurrences and residual analysis*. JASA.
 
----
+4. **Seal et al. (2025)** - *Statistical analysis on background seismicity using NND and network analysis*. Journal of Seismology.
 
-## 🙏 Acknowledgments
+5. **Shcherbakov & Kothari (2025)** - *Earthquake declustering using supervised machine learning*. BSSA.
 
-- **Dr. Niptika Jana** – Research supervision and guidance
-- **GNS Science** – New Zealand earthquake catalog (GeoNet)
-- **USGS** – Seismic data and catalog tools
-- **XGBoost Development Team** – Excellent ML library
+</details>
 
 ---
 
 ## 📧 Contact
 
-**Md Ashraf**  
-M.Sc. (Tech.) Applied Geophysics  
-Indian Institute of Technology (ISM) Dhanbad
+<div align="center">
 
-📧 Email: [23mc0049@iitism.ac.in](mailto:23mc0049@iitism.ac.in)  
-🔗 LinkedIn: [linkedin.com/in/md-ashraf](https://linkedin.com/in/md-ashraf)  
-🐙 GitHub: [@yourusername](https://github.com/yourusername)
+**Md Ashraf**
+<br>
+*M.Sc. (Tech.) Applied Geophysics*
+<br>
+*Indian Institute of Technology (ISM) Dhanbad*
+
+<br>
+
+[![Email](https://img.shields.io/badge/Email-23mc0049%40iitism.ac.in-red?style=for-the-badge&logo=gmail&logoColor=white)](mailto:23mc0049@iitism.ac.in)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github)](https://github.com/yourusername)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/md-ashraf)
+
+</div>
 
 ---
 
 <div align="center">
 
-### 🌟 Star this repository if you find it useful!
-
-**Made with ❤️ for safer earthquake monitoring**
+### 🌟 **Star this repository if you find it useful!**
 
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=earthquake-declustering)
-![GitHub stars](https://img.shields.io/github/stars/yourusername/earthquake-declustering?style=social)
+![Stars](https://img.shields.io/github/stars/yourusername/earthquake-declustering?style=social)
+![Forks](https://img.shields.io/github/forks/yourusername/earthquake-declustering?style=social)
 
-[⬆ Back to Top](#-machine-learningbased-declustering-of-earthquake-catalogs)
+**Made with ❤️ for safer earthquake science**
+
+[⬆️ Back to Top](#-earthquake-declustering-with-machine-learning)
 
 </div>
