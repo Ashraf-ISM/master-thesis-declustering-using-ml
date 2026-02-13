@@ -133,22 +133,7 @@ Expected relationships validated across multiple catalogs:
 
 ```
 master-thesis-declustering-using-ml/
-├── 📁 src/                          # Core implementation
-│   ├── som_dbscan_clustering.py     # Main clustering algorithm
-│   ├── validation_metrics.py       # Statistical validation tools
-│   └── visualization_utils.py      # Plotting and analysis
-├── 📁 notebooks/                   # Research notebooks
-│   ├── exploratory_analysis.ipynb  # Data exploration
-│   ├── algorithm_development.ipynb # Method development
-│   └── benchmarking.ipynb         # Performance comparison
-├── 📁 data/                        # Datasets and catalogs
-│   ├── processed/                  # Cleaned earthquake catalogs
-│   └── raw/                       # Original seismic data
-├── 📁 results/                     # Analysis outputs
-│   ├── plots/                     # Generated visualizations
-│   └── reports/                   # Statistical summaries
-├── 📁 tests/                       # Unit and integration tests
-├── 📁 docs/                        # Technical documentation
+
 ├── requirements.txt               # Python dependencies
 ├── setup.py                      # Package installation
 └── README.md                     # This file
