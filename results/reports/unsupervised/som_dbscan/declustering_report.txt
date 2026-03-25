@@ -1,0 +1,28 @@
+ENHANCED SOM + DBSCAN DECLUSTERING REPORT
+==================================================
+
+Generated: 2025-09-14 08:26:24
+Input file: Modified_data.csv
+Processing time: 55.91 seconds
+
+PARAMETERS USED:
+--------------------
+SOM candidates: [(4, 4), (5, 5), (6, 6), (7, 7), (8, 8)]
+Selected SOM grid: (6, 6)
+SOM iterations: 500
+SOM sigma: 2.0
+SOM learning rate: 0.1
+DBSCAN eps (days): 1.0
+DBSCAN min_samples: 3
+
+RESULTS SUMMARY:
+--------------------
+Total events: 2,568
+Background events: 1,856 (72.3%)
+Clustered events: 712 (27.7%)
+Number of clusters: 80
+COV (total): 1.5816
+COV (background): 1.2564
+Mean cluster size: 8.9
+Median cluster size: 4.0
+Largest cluster: 106 events

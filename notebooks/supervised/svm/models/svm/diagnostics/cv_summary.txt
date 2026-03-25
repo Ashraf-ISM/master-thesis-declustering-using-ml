@@ -1,0 +1,3 @@
+SVM 5-Fold Cross-Validation Summary
+Accuracy: 0.9446 ± 0.0023
+F1: 0.9603 ± 0.0017

@@ -1,0 +1,33 @@
+EARTHQUAKE RANDOM FOREST MODEL - PERFORMANCE METRICS
+======================================================================
+
+Model trained on: 20251109_215442
+Training samples: 80402
+Test samples: 20101
+Number of features: 6
+
+PERFORMANCE METRICS:
+----------------------------------------------------------------------
+Training Accuracy:        0.9771
+Test Accuracy:            0.9702
+Precision:                0.9692
+Recall:                   0.9892
+F1 Score:                 0.9791
+Cross-Val Accuracy:       0.9672 (+/- 0.0013)
+
+CLASSIFICATION REPORT:
+----------------------------------------------------------------------
+              precision    recall  f1-score   support
+
+  background       0.97      0.92      0.95      5934
+   triggered       0.97      0.99      0.98     14167
+
+    accuracy                           0.97     20101
+   macro avg       0.97      0.96      0.96     20101
+weighted avg       0.97      0.97      0.97     20101
+
+
+CONFUSION MATRIX:
+----------------------------------------------------------------------
+[[ 5488   446]
+ [  153 14014]]

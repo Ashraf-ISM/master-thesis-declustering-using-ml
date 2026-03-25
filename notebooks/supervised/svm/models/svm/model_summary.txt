@@ -1,0 +1,22 @@
+SVM Model Summary
+============================================================
+Accuracy     : 0.9436
+Precision    : 0.9448
+Recall       : 0.9436
+F1 Score     : 0.9440
+ROC–AUC      : 0.9823
+Specificity  : 0.9293
+
+Confusion Matrix:
+[[ 8272   629]
+ [ 1072 20178]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+  background       0.89      0.93      0.91      8901
+   triggered       0.97      0.95      0.96     21250
+
+    accuracy                           0.94     30151
+   macro avg       0.93      0.94      0.93     30151
+weighted avg       0.94      0.94      0.94     30151

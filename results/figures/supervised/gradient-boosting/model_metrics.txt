@@ -1,0 +1,33 @@
+EARTHQUAKE GRADIENT BOOSTING MODEL - PERFORMANCE METRICS
+======================================================================
+
+Model trained on: 20251110_153427
+Training samples: 80402
+Test samples: 20101
+Number of features: 6
+
+PERFORMANCE METRICS:
+----------------------------------------------------------------------
+Training Accuracy:        0.9726
+Test Accuracy:            0.9726
+Precision:                0.9733
+Recall:                   0.9883
+F1 Score:                 0.9807
+Cross-Val Accuracy:       0.9699 (+/- 0.0011)
+
+CLASSIFICATION REPORT:
+----------------------------------------------------------------------
+              precision    recall  f1-score   support
+
+  background       0.97      0.94      0.95      5934
+   triggered       0.97      0.99      0.98     14167
+
+    accuracy                           0.97     20101
+   macro avg       0.97      0.96      0.97     20101
+weighted avg       0.97      0.97      0.97     20101
+
+
+CONFUSION MATRIX:
+----------------------------------------------------------------------
+[[ 5550   384]
+ [  166 14001]]
