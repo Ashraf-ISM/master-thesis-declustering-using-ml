@@ -46,7 +46,7 @@ The structure is now organized by workflow stage and by learning style, with sep
 
 ## Working Convention
 
-Use the following rule of thumb when adding new material:
+Use the following rule of thumb when adding new material: 
 
 1. Put source catalogs in `data/<mode>/raw/`.
 2. Put cleaned or engineered datasets in `data/<mode>/processed/`.
