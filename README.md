@@ -36,7 +36,7 @@ The structure is now organized by workflow stage and by learning style, with sep
     └── src/declustering/
 ```
 
-## Current Contents
+## Current Contents 
 
 - `data/unsupervised/` contains the current processed SOM + DBSCAN and GMT-related datasets.
 - `notebooks/unsupervised/` contains exploratory, fractal-dimension, and SOM + DBSCAN notebooks.
