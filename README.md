@@ -1,4 +1,4 @@
-# Earthquake Declustering Thesis Workspace
+## Earthquake Declustering Thesis Workspace
 
 This repository is the main thesis workspace for earthquake catalog declustering using machine learning and statistical methods.
 
